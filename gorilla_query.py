@@ -13,18 +13,27 @@ def parse_arguments():
 	Parses arguments and returns a dictionary of the arguments.
 	"""
 	parser = argparse.ArgumentParser(description="Submits genes to GOrilla for term enrichment analysis")
-	parser.add_argument("-g", "--genefile", type=str, required=True, help="Path to a file containing newline-delimited genes, preferably as gene symbols")
 	parser.add_argument("-o", "--outdir", type=str, required=True, help="Directory to output the enrichment tables")
+	parser.add_argument("-g", "--genefile", type=str, help="Path to a file containing newline-delimited genes, preferably as gene symbols")
+	parser.add_argument("-i", "--id", type=str, help="ID of an existing GOrilla run, to skip directly to results scrape")
 	
 	args = parser.parse_args()
 
-	genefile, outdir = args.genefile, args.outdir
-	with open(genefile, "r") as f:
-		gene_list = [line.strip() for line in f]
+	genefile, outdir, run_id = args.genefile, args.outdir, args.id
+
+	if (not genefile and not run_id) or (genefile and run_id):
+		print("Error: Need either a gene list or a run ID (exactly one)")
+
+	if genefile:
+		with open(genefile, "r") as f:
+			gene_list = [line.strip() for line in f]
+	else:
+		gene_list = None
 	
 	return {
 		"g": gene_list,
-		"o": outdir
+		"o": outdir,
+		"i": run_id
 	}
 
 
@@ -106,12 +115,16 @@ if __name__ == "__main__":
 	arg_dict = parse_arguments()
 	gene_list = arg_dict["g"]
 	outdir = arg_dict["o"]
+	run_id = arg_dict["i"]
 
 	if not os.path.isdir(outdir):
 		os.mkdir(outdir)
 
-	print("Submitting to GOrilla...")	
-	base_url = submit_gorilla(gene_list)
+	if gene_list:
+		print("Submitting to GOrilla...")
+		base_url = submit_gorilla(gene_list)
+	elif run_id:
+		base_url = "/".join([GORILLA_URL, "GOrilla", run_id])
 
 	for onto_type in GO_ONTOS:
 		print("Scraping results for GO {0}...".format(onto_type.upper()))
