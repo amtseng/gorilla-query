@@ -4,10 +4,15 @@ Despite the awful acronym (if it can even be called one), [GOrilla](http://cbl-g
 Other functionalities to take advantage of other GOrilla usages can be easily extended from this script.
 
 #### Usage
-`python gorilla_query.py -g [GENE_LIST] -o [OUTPUT_DIR]`
+`python gorilla_query.py (-g [GENE_LIST] | -i [RUN_ID]) -o [OUTPUT_DIR]`
 - `GENE_LIST`
 	- A file containing a ranking of `\n`-delimited genes
 	- Genes are preferably given as official gene symbols, but Ensembl IDs are also acceptable (see [the web interface](http://cbl-gorilla.cs.technion.ac.il/) for more details
+	- Either this, or `-i` must be specified, not both
+- `RUN_ID`
+	- The run ID for a known GOrilla run
+	- If specified, skips the submission of any query, and direcly scrapes the results
+	- Either this, or `-g` must be specified, not both
 - `OUTPUT_DIR`
 	- GOrilla Query outputs three files into this directory (which is created if it does not exist already), corresponding to the gene enrichment tables for Process, Function, and Component
 	- Files will be `OUTPUT_DIR/process.tsv`, `OUTPUT_DIR/function.tsv`, and `OUTPUT_DIR/component.tsv`
